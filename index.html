@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stundenplan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f0f5;
+            color: #333;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            color: #000; /* Schwarz für die Überschrift */
+        }
+
+        .date {
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007AFF;
+        }
+
+        .day-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-section h2 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .Vorlesung h2 {
+            color: #474F59; /* Grau für Vorlesung */
+        }
+
+        .Seminar h2 {
+            color: #3BB0BF; /* Pacific Blue */
+        }
+
+        .UaK h2 {
+            color: #F77A54; /* Coral */
+        }
+
+        .Kurs h2 {
+            color: #FFC463; /* Maximum Yellow Red */
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        ul li {
+            font-size: 18px;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        ul li:last-child {
+            border-bottom: none;
+        }
+
+        .details {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .legend {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend div {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .legend div:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+
+        .legend .Vorlesung {
+            background-color: #474F59; /* Grau */
+        }
+
+        .legend .Seminar {
+            background-color: #3BB0BF; /* Pacific Blue */
+        }
+
+        .legend .UaK {
+            background-color: #F77A54; /* Coral */
+        }
+
+        .legend .Kurs {
+            background-color: #FFC463; /* Maximum Yellow Red */
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .title {
+                font-size: 20px;
+            }
+
+            .day-section h2 {
+                font-size: 18px;
+            }
+
+            ul li {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Stundenplan</h1>
+
+        <!-- Legende -->
+        <div class="legend">
+            <div><span class="color-box Vorlesung"></span> Vorlesung</div>
+            <div><span class="color-box Seminar"></span> Seminar</div>
+            <div><span class="color-box UaK"></span> UaK (Übung am Krankenbett)</div>
+            <div><span class="color-box Kurs"></span> Kurs</div>
+        </div>
+
+        <div id="current-date" class="date">
+            <!-- Aktuelles Datum wird hier eingefügt -->
+        </div>
+        <div id="current-day" class="day-section">
+            <h2>Heute</h2>
+            <ul id="today-list">
+                <!-- Stunden für heute werden hier dynamisch eingefügt -->
+            </ul>
+        </div>
+        <div id="next-day" class="day-section">
+            <h2>Morgen</h2>
+            <ul id="tomorrow-list">
+                <!-- Stunden für morgen werden hier dynamisch eingefügt -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Stundenplandaten
+        const timetable = {
+            "Montag": [
+                { type: "Kurs", subject: "Pathologie", time: "08:00 - 08:45", details: "Freiwillig" },
+                { type: "Vorlesung", subject: "Pathologie", time: "08:45 - 09:30" },
+                { type: "Vorlesung", subject: "Psychiatrie und Psychosomatik", time: "10:30 - 12:00", details: "Alte Kinderklinik" },
+                { type: "Kurs", subject: "Grundlagen der klinischen Untersuchung", time: "15:00 - 16:00", details: "Nur an den Terminen: 14.10.24 (Onko: Haut/Kopf/Hals), 21.10.24 (Kardio: Thorax/Lunge), 28.10.24 (Innere I: Abdomen), 04.11.24 (Innere I: Anamneseerhebung), 11.11.24 (Allgemeinmedizin: Muskel/Skelett/Gelenke), 18.11.24 (Nephrologie: Thorax/Herz/Gefäße)" }
+            ],
+            "Dienstag": [
+                { type: "Vorlesung", subject: "Augenheilkunde", time: "08:15 - 09:00" },
+                { type: "Vorlesung", subject: "Psychiatrie/Psychosomatik", time: "09:15 - 10:45" },
+                { type: "Seminar", subject: "Ethik", time: "11:15 - 13:15", details: "Nur an den Terminen: 17.12.24, 07.01.25, 28.01.25" }
+            ],
+            "Mittwoch": [
+                { type: "Kurs", subject: "Pathologie", time: "08:00 - 08:45", details: "Pflicht" },
+                { type: "Vorlesung", subject: "Pathologie", time: "08:45 - 09:30" },
+                { type: "Vorlesung", subject: "Humangenetik", time: "09:45 - 11:15" },
+                { type: "Seminar", subject: "Allgemeinmedizin", time: "11:30 - 13:00", details: "Nur an den Terminen: 06.11.24 (Krankheitsschwere), 04.12.24 (Neu in der Hausarztpraxis), 18.12.24 (Hausbesuch), 15.01.25 (Arriba), 22.01.25 (Letzte VL)" },
+                { type: "Vorlesung", subject: "Allgemeinmedizin", time: "11:30 - 13:00", details: "Nur wenn kein Seminar stattfindet" },
+                { type: "Vorlesung", subject: "Ethik", time: "13:15 - 14:15", details: "Präsenz, nur am 23.10.24 und 30.10.24" },
+                { type: "Vorlesung", subject: "Ethik", time: "16:45 - 18:15", details: "Zoom, nur am 06.11.24 und 11.12.24" }
+            ],
+            "Donnerstag": [
+                { type: "UaK", subject: "Augenheilkunde", time: "08:15 - 09:30" },
+                { type: "Kurs", subject: "Humangenetik", time: "11:15 - 13:15" }
+            ],
+            "Freitag": [
+                { type: "Kurs", subject: "Pathologie", time: "08:00 - 08:45", details: "Freiwillig" },
+                { type: "Vorlesung", subject: "Pathologie", time: "08:45 - 09:30" },
+                { type: "UaK", subject: "Psychiatrie und Psychosomatik", time: "11:00 - 13:30", details: "Ab 18.10.24"
+                }
+            ]
+        };
+
+        // Funktion zum Formatieren des Datums und Wochentages
+        function formatDate(date) {
+            const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+            const dayName = days[date.getDay()];
+            const dateString = date.toLocaleDateString('de-DE');
+            return `${dayName}, ${dateString}`;
+        }
+
+        // Stundenplan für heute und morgen laden
+        function loadTimetable() {
+            const today = new Date();
+            const tomorrow = new Date();
+            tomorrow.setDate(today.getDate() + 1);
+
+            const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+            const todayName = days[today.getDay()];
+            const tomorrowName = days[tomorrow.getDay()];
+
+            const todayList = document.getElementById('today-list');
+            const tomorrowList = document.getElementById('tomorrow-list');
+            const currentDateElement = document.getElementById('current-date');
+
+            // Aktuelles Datum anzeigen
+            currentDateElement.textContent = formatDate(today);
+
+            // Stunden für heute laden
+            if (timetable[todayName]) {
+                timetable[todayName].forEach(event => {
+                    const li = document.createElement('li');
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = event.type;
+
+                    const title = document.createElement('h2');
+                    title.textContent = event.subject;
+                    eventDiv.appendChild(title);
+
+                    const details = document.createElement('div');
+                    details.className = 'details';
+                    details.textContent = `${event.time}${event.details ? ' - ' + event.details : ''}`;
+                    eventDiv.appendChild(details);
+
+                    li.appendChild(eventDiv);
+                    todayList.appendChild(li);
+                });
+            } else {
+                todayList.innerHTML = "<li>Keine Stunden heute</li>";
+            }
+
+            // Stunden für morgen laden
+            if (timetable[tomorrowName]) {
+                timetable[tomorrowName].forEach(event => {
+                    const li = document.createElement('li');
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = event.type;
+
+                    const title = document.createElement('h2');
+                    title.textContent = event.subject;
+                    eventDiv.appendChild(title);
+
+                    const details = document.createElement('div');
+                    details.className = 'details';
+                    details.textContent = `${event.time}${event.details ? ' - ' + event.details : ''}`;
+                    eventDiv.appendChild(details);
+
+                    li.appendChild(eventDiv);
+                    tomorrowList.appendChild(li);
+                });
+            } else {
+                tomorrowList.innerHTML = "<li>Keine Stunden morgen</li>";
+            }
+        }
+
+        // Beim Laden der Seite den Stundenplan initialisieren
+        window.onload = loadTimetable;
+    </script>
+</body>
+</html>
